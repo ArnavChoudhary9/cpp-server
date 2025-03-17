@@ -2,13 +2,15 @@
     "languages": [
         {
             "Python": {
+                "valid": true,
                 "Files": [
                     "main.py"
                 ]
             }
         },
         {
-            "C++": {
+            "Cpp": {
+                "valid": true,
                 "Files": [
                     "main.cpp"
                 ]

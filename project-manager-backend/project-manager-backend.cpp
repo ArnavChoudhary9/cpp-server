@@ -1,8 +1,9 @@
-#include <iostream>
 #include "httplib.h"
 #include "projectManager.h"
 #include "utility.h"
 #include "fileManager.h"
+
+#include <iostream>
 
 #define CONFIG_PATH "ProjectConfigurations.json"
 
@@ -39,23 +40,45 @@ int main() {
     });
 
     svr.Get("/create", [](const httplib::Request& req, httplib::Response& res) {
-        nlohmann::json configs = Utility::ReadJSON(CONFIG_PATH);
-
         std::string requested = req.get_param_value("language"); 
         if (requested.empty()) {
             res.status = 400;
             res.set_content("{ \"error\": \"no language input\" }", "application/json");
+            return;
         }
+
+        static nlohmann::json configs = Utility::ReadJSON(CONFIG_PATH);
+
+        nlohmann::json projectConfig = {
+            {"valid", false}
+        };
+
+        for (const auto& langEntry : configs["languages"]) {
+            if (langEntry.contains(requested)) {
+                projectConfig = langEntry[requested];
+                break;
+            }
+        }
+
+        if (!projectConfig["valid"]) {
+            res.status = 400;
+            res.set_content("{ \"error\": \"invalid language input\" }", "application/json");
+            return;
+        }
+
+        res.status = 200;
+        res.set_content("{ \"success\": \"project created\" }", "application/json");
     });
 
     // Custom 404 error handler
     svr.set_error_handler([](const httplib::Request& req, httplib::Response& res) {
-        res.status = 404; // Set HTTP status code to 404
-        res.set_content(
-            "<html><body><h1>404 Not Found</h1><p>The requested URL " + req.path +
-            " was not found on this server.</p></body></html>",
-            "text/html"
-        );
+        if (res.status == 404) {
+            res.set_content(
+                "<html><body><h1>404 Not Found</h1><p>The requested URL " + req.path +
+                " was not found on this server.</p></body></html>",
+                "text/html"
+            );
+        }
     });
 
 #pragma endregion
