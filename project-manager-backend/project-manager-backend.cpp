@@ -81,6 +81,15 @@ int main() {
         }
     });
 
+    // Shutdown
+    svr.Get("/shutdown", [&svr](const httplib::Request& req, httplib::Response& res) {
+        res.status = 200;
+        res.set_content("{ \"success\": \"server successfully shutdown\" }", "application/json");
+
+        std::cout << "Shutting the server down ..." << std::endl;
+        svr.stop();
+    });
+
 #pragma endregion
 
     svr.set_logger(logger);
