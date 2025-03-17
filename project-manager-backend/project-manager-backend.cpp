@@ -1,20 +1,8 @@
 #include <iostream>
-#include <fstream>
-#include <sstream>
 #include "httplib.h"
+#include "fileManager.h"
 
 #pragma region HelperFunctions
-
-std::string readJSONFile(const std::string & filePath) {
-    std::ifstream file(filePath);
-    if (!file.is_open()) {
-        throw std::runtime_error("Could not open JSON file: " + filePath);
-    }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf(); // Read the entire file into a string buffer
-    return buffer.str();
-}
 
 void logger(const httplib::Request& req, const httplib::Response& res) {
     std::cout << "Request: " << req.method << " " << req.path << " From: " << req.remote_addr << std::endl;
@@ -32,19 +20,21 @@ int main() {
     std::cout << "Configuring endpoints" << std::endl;
 
     svr.Get("/", [](const httplib::Request& req, httplib::Response& res) {
-        res.set_content("The Backend is up and running.", "text/plain");
+        res.set_content("{ \"status\": \"running.\" }", "application/json");
     });
 
     svr.Get("/project-configs", [](const httplib::Request& req, httplib::Response& res) {
         try {
-            std::string projectConfigs = readJSONFile("ProjectConfigurations.json");
+            std::string projectConfigs = FileManager::ReadFile("ProjectConfigurations.json");
             res.set_content(projectConfigs, "application/json");
         }
         catch (const std::exception& e) {
             res.status = 500;
-            res.set_content("Error fetching Project Configurations: " + std::string(e.what()), "text/plain");
+            res.set_content("{ \"error\": " + std::string(e.what()) + " }", "application/json");
         }
     });
+
+    //svr.Get("/create", [])
 
     // Custom 404 error handler
     svr.set_error_handler([](const httplib::Request& req, httplib::Response& res) {

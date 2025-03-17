@@ -127,9 +127,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="fileManager.h" />
     <ClInclude Include="httplib.h" />
+    <ClInclude Include="json.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="fileManager.cpp" />
     <ClCompile Include="project-manager-backend.cpp" />
   </ItemGroup>
   <ItemGroup>
