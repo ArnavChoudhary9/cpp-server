@@ -1,6 +1,10 @@
 #include <iostream>
 #include "httplib.h"
+#include "projectManager.h"
+#include "utility.h"
 #include "fileManager.h"
+
+#define CONFIG_PATH "ProjectConfigurations.json"
 
 #pragma region HelperFunctions
 
@@ -25,7 +29,7 @@ int main() {
 
     svr.Get("/project-configs", [](const httplib::Request& req, httplib::Response& res) {
         try {
-            std::string projectConfigs = FileManager::ReadFile("ProjectConfigurations.json");
+            std::string projectConfigs = FileManager::ReadFile(CONFIG_PATH);
             res.set_content(projectConfigs, "application/json");
         }
         catch (const std::exception& e) {
@@ -34,7 +38,15 @@ int main() {
         }
     });
 
-    //svr.Get("/create", [])
+    svr.Get("/create", [](const httplib::Request& req, httplib::Response& res) {
+        nlohmann::json configs = Utility::ReadJSON(CONFIG_PATH);
+
+        std::string requested = req.get_param_value("language"); 
+        if (requested.empty()) {
+            res.status = 400;
+            res.set_content("{ \"error\": \"no language input\" }", "application/json");
+        }
+    });
 
     // Custom 404 error handler
     svr.set_error_handler([](const httplib::Request& req, httplib::Response& res) {
