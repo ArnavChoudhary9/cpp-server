@@ -19,6 +19,7 @@ void logger(const httplib::Request& req, const httplib::Response& res) {
 int main() {
     std::cout << "Initializing the server ..." << std::endl;
     httplib::Server svr;
+    ProjectManager manager;
 
 #pragma region Endpoints
 
@@ -39,11 +40,21 @@ int main() {
         }
     });
 
-    svr.Get("/create", [](const httplib::Request& req, httplib::Response& res) {
-        std::string requested = req.get_param_value("language"); 
+    svr.Get("/create", [&manager](const httplib::Request& req, httplib::Response& res) {
+        std::string requested = req.get_param_value("language");
+        std::string name = req.get_param_value("name");
+
+        // var: requested will be empty if not set in params,
+        // effectively this checks if the language parameter is set or not.
         if (requested.empty()) {
             res.status = 400;
             res.set_content("{ \"error\": \"no language input\" }", "application/json");
+            return;
+        }
+
+        if (name.empty()) {
+            res.status = 400;
+            res.set_content("{ \"error\": \"no name\" }", "application/json");
             return;
         }
 
@@ -63,6 +74,12 @@ int main() {
         if (!projectConfig["valid"]) {
             res.status = 400;
             res.set_content("{ \"error\": \"invalid language input\" }", "application/json");
+            return;
+        }
+
+        if (!manager.Create(name, projectConfig)) {
+            res.status = 500;
+            res.set_content("{ \"error\": \"an error occured during project creation\" }", "application/json");
             return;
         }
 

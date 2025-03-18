@@ -3,7 +3,7 @@
         {
             "Python": {
                 "valid": true,
-                "Files": [
+                "files": [
                     "main.py"
                 ]
             }
@@ -11,9 +11,15 @@
         {
             "Cpp": {
                 "valid": true,
-                "Files": [
+                "files": [
                     "main.cpp"
                 ]
+            }
+        },
+        {
+            "Rust": {
+                "valid": true,
+                "files": []
             }
         }
     ]
